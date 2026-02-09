@@ -1,1 +1,190 @@
+# SoC IoT RISC-V – PicoRV32 + AXI-Lite
+
+## Desenvolvimento e Verificação de um Sistema-em-Chip para IoT implementado em FPGA
+
+Projeto acadêmico do programa **CIDigital / INATEL**.
+_______________________________________________________________________________________________________________________________________
+
+## Visão Geral
+
+Este repositório contém o desenvolvimento de um **Sistema-em-Chip (SoC)** baseado na arquitetura **RISC-V (RV32I)** utilizando o núcleo **PicoRV32**, com interconexão interna **AXI-Lite**.
+
+O objetivo do projeto é criar uma plataforma modular capaz de executar firmware **bare-metal** e interagir com periféricos típicos de aplicações **IoT**.
+
+________________________________________________________________________________________________________________________________________
+
+## Componentes do Sistema
+
+O sistema integra:
+
+- CPU **PicoRV32**
+- Barramento **AXI-Lite**
+- Memórias on-chip (**ROM** e **RAM**)
+
+### Periféricos
+
+- GPIO  
+- UART  
+- SPI  
+- I2C  
+- Timer  
+- Controlador de Interrupções  
+- Infraestrutura de clock e reset  
+
+
+## Objetivos
+
+### Objetivo Geral
+
+Desenvolver e verificar funcionalmente um **SoC voltado a aplicações IoT**.
+
+### Objetivos Específicos
+
+- Projetar a arquitetura do SoC  
+- Implementar periféricos mapeados em memória  
+- Desenvolver ambiente de verificação com **UVM**  
+- Validar o sistema em **FPGA**  
+
+
+## Arquitetura do Sistema
+
+O SoC utiliza:
+
+- CPU como **mestre AXI-Lite**  
+- Periféricos e memórias como **escravos AXI-Lite**
+
+### Barramento
+
+- 32 bits de endereço  
+- 32 bits de dados  
+- **WSTRB** de 4 bits  
+
+O sistema opera com **clock de 50 MHz** na **FPGA DE1**.
+
+Arquitetura em blocos disponível em:
+
+rtl/
+top/
+cpu/
+bus/
+mem/
+periph/
+common/
+
+verification/
+tb/
+uvm_env/
+sequences/
+scoreboard/
+coverage/
+
+firmware/
+boot/
+drivers/
+tests/
+
+fpga/
+quartus/
+constraints/
+
+docs/
+architecture/
+reports/
+
+Essa organização segue boas práticas de projetos **SoC modulares** e facilita a reutilização de IPs.
+
+## Tecnologias Utilizadas
+
+### Design
+
+- Verilog  
+- SystemVerilog  
+- PicoRV32  
+- AXI-Lite  
+
+### Verificação
+
+- UVM  
+- Assertions (SVA)  
+- Coverage funcional e de registradores  
+
+### Implementação
+
+- Quartus  
+- FPGA **DE1 (Cyclone II)**  
+
+### Firmware
+
+- Toolchain **RISC-V**  
+- Execução **bare-metal**  
+
+
+
+## Fluxo de Desenvolvimento
+
+- Definição da arquitetura  
+- Implementação RTL  
+- Integração do SoC  
+- Desenvolvimento do firmware  
+- Verificação funcional (**UVM**)  
+- Síntese e implementação  
+- Validação em FPGA  
+
+## Verificação
+
+O ambiente de verificação inclui:
+
+- Agente **AXI-Lite** ativo  
+- Scoreboard com modelo de referência  
+- **UVM RAL**  
+- Coverage funcional  
+- Testes de integração e estresse  
+
+O projeto utiliza **matriz de rastreabilidade** entre requisitos, testes e coverage.
+
+## Resultados Esperados
+
+- SoC funcional  
+- Validação experimental em FPGA  
+- Plataforma base para projetos IoT futuros  
+
+## Equipe
+
+**Grupo 1 – Cícero**  
+CIDigital / INATEL  
+
+## Equipe
+
+Grupo 1 – Cícero  
+CIDigital / INATEL
+
+### Integrantes
+
+- Ana Carolina Vivian dos Reis
+- Bernard Chemitoua Mibankanina
+- Cícero Luiz Alves Cunha
+- Daniel Quiteque
+- Felipe Ribeiro Lobato
+- Felippe Silvério de Castro
+- Gabriel Caynã Diniz Laraia
+- Gabriele Fidélis Jorge
+- Guilherme Pires Piedade
+- Igor Azevedo Cintra
+- Letícia da Silva Souza
+- Lucas da Silveira Ross
+- Luiz Renault Leite Rodrigues
+- Luiz Ricardo Pires
+- Marcelo Pelagio Pontes Morais
+- Maysa Freire dos Santos
+- Natanael Irland de Souza
+- Paulo Eduardo Pereira Maia
+- Rafael da Silva Macêdo
+- Sinal Exaucé Macoungou Nzaou
+
+
+
+
+## Licença
+
+Uso acadêmico.
 
