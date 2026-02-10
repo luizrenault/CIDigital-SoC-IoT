@@ -231,21 +231,6 @@ else
 reg timer0_match_pend_q;
 reg timer0_irq_pend_q;
 
-always @ (posedge clk_i or posedge rst_i)
-if (rst_i) begin
-    timer0_match_pend_q <= 1'b0;
-    timer0_irq_pend_q   <= 1'b0;
-end else if (write_en_w && (cfg_awaddr_i[7:0] == `TIMER_STATUS0)) begin
-    // Write-1-to-clear
-    if (cfg_wdata_i[0]) timer0_match_pend_q <= 1'b0;
-    if (cfg_wdata_i[1]) timer0_irq_pend_q   <= 1'b0;
-end else begin
-    // set acontece na lógica do timer (mais abaixo)
-    timer0_match_pend_q <= timer0_match_pend_q;
-    timer0_irq_pend_q   <= timer0_irq_pend_q;
-end
-
-
 wire [31:0]  timer_val0_current_in_w;
 
 
@@ -397,26 +382,24 @@ end
 
 assign timer_val0_current_in_w = timer0_value_q;
 
-// Lógica de match + postscaler + flags sticky
+// Lógica de match + postscaler + flags sticky (com W1C combinado)
 always @ (posedge clk_i or posedge rst_i)
 if (rst_i) begin
-    // flags já resetadas acima, mas mantém consistência
     timer0_match_pend_q <= 1'b0;
     timer0_irq_pend_q   <= 1'b0;
-end else begin
-    // Evita brigar com o W1C do STATUS0 no mesmo ciclo
-    if (!(write_en_w && (cfg_awaddr_i[7:0] == `TIMER_STATUS0))) begin
-        if (timer_ctrl0_enable_out_w && match0_pulse_w) begin
-            timer0_match_pend_q <= 1'b1;
-
-            if (timer0_post_cnt_q == (timer_postscale0_div_eff_w - 8'd1)) begin
-                timer0_post_cnt_q <= 8'd0;
-                if (timer_ctrl0_interrupt_out_w)
-                    timer0_irq_pend_q <= 1'b1;
-            end else begin
-                timer0_post_cnt_q <= timer0_post_cnt_q + 8'd1;
-            end
-        end
+end else if (write_en_w && (cfg_awaddr_i[7:0] == `TIMER_STATUS0)) begin
+    // Write-1-to-clear (W1C)
+    if (cfg_wdata_i[0]) timer0_match_pend_q <= 1'b0;
+    if (cfg_wdata_i[1]) timer0_irq_pend_q   <= 1'b0;
+end else if (timer_ctrl0_enable_out_w && match0_pulse_w) begin
+    // Set flags on match
+    timer0_match_pend_q <= 1'b1;
+    if (timer0_post_cnt_q == (timer_postscale0_div_eff_w - 8'd1)) begin
+        timer0_post_cnt_q <= 8'd0;
+        if (timer_ctrl0_interrupt_out_w)
+            timer0_irq_pend_q <= 1'b1;
+    end else begin
+        timer0_post_cnt_q <= timer0_post_cnt_q + 8'd1;
     end
 end
 
@@ -427,25 +410,6 @@ wire timer0_irq_w = timer0_irq_pend_q &&
 
 
 //-----------------------------------------------------------------
-// Timer1 REMOVIDO (comentado)
-//-----------------------------------------------------------------
-// wire [31:0]  timer_val1_current_in_w;
-// reg [31:0] timer1_value_q;
-//
-// always @ (posedge clk_i or posedge rst_i)
-// if (rst_i)
-//     timer1_value_q <= 32'b0;
-// else if (timer_val1_wr_req_w)
-//     timer1_value_q <= timer_val1_current_out_w;
-// else if (timer_ctrl1_enable_out_w)
-//     timer1_value_q <= timer1_value_q + 32'd1;
-//
-// assign timer_val1_current_in_w = timer1_value_q;
-//
-// wire timer1_irq_w = (timer_val1_current_in_w == timer_cmp1_value_out_w) && timer_ctrl1_interrupt_out_w && timer_ctrl1_enable_out_w;
-
-
-//-----------------------------------------------------------------
 // IRQ output
 //-----------------------------------------------------------------
 reg intr_q;
@@ -453,10 +417,7 @@ reg intr_q;
 always @ (posedge clk_i or posedge rst_i)
 if (rst_i)
     intr_q <= 1'b0;
-else if (1'b0
-        | timer0_irq_w
-        // | timer1_irq_w
-)
+else if (timer0_irq_w)
     intr_q <= 1'b1;
 else
     intr_q <= 1'b0;

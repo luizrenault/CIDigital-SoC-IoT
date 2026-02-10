@@ -194,37 +194,37 @@ module tb_timer_presc_then_post;
     end
   endtask
 
-  // Wait IRQ com timeout (Verilog puro)
+  // Wait IRQ com timeout (Verilog puro) - usando contador simples
   task wait_irq_or_timeout;
     input integer timeout_ns;
     output reg got_irq;
+    integer elapsed_ns;
     begin
       got_irq = 0;
-      fork
-        begin
-          @(posedge intr_o);
-          got_irq = 1;
-        end
-        begin
-          #(timeout_ns);
-        end
-      join
+      elapsed_ns = 0;
+      while (!intr_o && (elapsed_ns < timeout_ns)) begin
+        #1;
+        elapsed_ns = elapsed_ns + 1;
+      end
+      if (intr_o)
+        got_irq = 1;
     end
   endtask
 
   // ------------------------------------------------------------
   // Configs
   // ------------------------------------------------------------
-  localparam integer PRESC_DIV = 100;      // 1us tick
-  localparam integer CMP_12MS  = 12_000;   // 12ms
-  localparam integer CMP_100US = 100;      // 100us base period
+  // Fast simulation settings (was originally 12ms/500us)
+  localparam integer PRESC_DIV = 1;        // No prescaling (10ns tick)
+  localparam integer CMP_FAST  = 20;       // 20 ticks = 200ns
+  localparam integer CMP_PERIOD = 5;       // 5 ticks = 50ns base
   localparam integer POST_1    = 1;
   localparam integer POST_5    = 5;
 
-  // CTRL bits:
-  // bit1 IRQ_EN, bit2 ENABLE, bit3 AUTO_RELOAD
-  localparam [31:0] CTRL_ENABLE_IRQ        = 32'h0000_0006; // 0b0110
-  localparam [31:0] CTRL_ENABLE_IRQ_AR     = 32'h0000_000E; // 0b1110
+  // CTRL bits (from timer_defs.v):
+  // bit1: TIMER_CTRL0_INTERRUPT, bit2: TIMER_CTRL0_ENABLE, bit3: TIMER_CTRL0_AUTORELOAD
+  localparam [31:0] CTRL_ENABLE_IRQ        = 32'h0000_0006; // IRQ_EN=1, ENABLE=1, AUTO_RELOAD=0
+  localparam [31:0] CTRL_ENABLE_IRQ_AR     = 32'h0000_000E; // IRQ_EN=1, ENABLE=1, AUTO_RELOAD=1
 
   time t0, t1;
   reg got_irq;
@@ -256,28 +256,29 @@ module tb_timer_presc_then_post;
 `endif
 
     // ==========================================================
-    // FASE 1: testar PRESCALER (12ms)
+    // FASE 1: testar PRESCALER (~200ns)
+    // PRESC_DIV=1 (10ns period) * CMP_FAST=20 = 200ns
     // ==========================================================
-    $display("\n=== FASE 1: Prescaler -> IRQ em ~12ms ===");
+    $display("\n=== FASE 1: Prescaler -> IRQ em ~200ns ===");
 
     // disable e limpa
     axi_write32({24'b0, `TIMER_CTRL0}, 32'h0);
     clear_status0();
 
-    // base 1us
+    // no prescaling (10ns tick)
     axi_write32({24'b0, `TIMER_PRESCALE0}, PRESC_DIV);
     axi_write32({24'b0, `TIMER_POSTSCALE0}, POST_1);
 
     // one-shot: autoreload = 0
     axi_write32({24'b0, `TIMER_VAL0}, 32'd0);
-    axi_write32({24'b0, `TIMER_CMP0}, CMP_12MS);
+    axi_write32({24'b0, `TIMER_CMP0}, CMP_FAST);
 
     // enable + irq
     axi_write32({24'b0, `TIMER_CTRL0}, CTRL_ENABLE_IRQ);
 
     // espera IRQ
     t0 = $time;
-    wait_irq_or_timeout(20_000_000, got_irq); // 20ms timeout
+    wait_irq_or_timeout(5_000, got_irq); // 5us timeout (plenty)
 
     if (!got_irq) begin
       $display("[%0t] ERROR: timeout IRQ fase 1", $time);
@@ -285,39 +286,39 @@ module tb_timer_presc_then_post;
     end
 
     t1 = $time;
-    $display("[%0t] IRQ fase 1 OK. Delta = %0t ns (esperado ~12_000_000 ns)", $time, (t1 - t0));
+    $display("[%0t] IRQ fase 1 OK. Delta = %0t ns (esperado ~200 ns)", $time, (t1 - t0));
 
     // limpa IRQ para intr_o cair
     clear_irq_pend();
     repeat (5) @(posedge clk);
 
     // ==========================================================
-    // FASE 2: testar POSTSCALER (500us)
-    // Base: match a cada 100us (CMP=100 com 1us tick e AUTO_RELOAD=1)
-    // Post: 5 matches => 500us
+    // FASE 2: testar POSTSCALER (~250ns)
+    // Base: match a cada 50ns (CMP_PERIOD=5 com 10ns tick e AUTO_RELOAD=1)
+    // Post: 5 matches => 50ns * 5 = 250ns
     // ==========================================================
-    $display("\n=== FASE 2: Postscaler -> IRQ em ~500us ===");
+    $display("\n=== FASE 2: Postscaler -> IRQ em ~250ns ===");
 
     // disable e limpa
     axi_write32({24'b0, `TIMER_CTRL0}, 32'h0);
     clear_status0();
 
-    // mantém prescaler 1us
+    // mantém sem prescaling
     axi_write32({24'b0, `TIMER_PRESCALE0}, PRESC_DIV);
 
     // postscaler divide por 5
     axi_write32({24'b0, `TIMER_POSTSCALE0}, POST_5);
 
-    // período base 100us com autoreload
+    // período base 50ns com autoreload
     axi_write32({24'b0, `TIMER_VAL0}, 32'd0);
-    axi_write32({24'b0, `TIMER_CMP0}, CMP_100US);
+    axi_write32({24'b0, `TIMER_CMP0}, CMP_PERIOD);
 
     // enable + irq + autoreload
     axi_write32({24'b0, `TIMER_CTRL0}, CTRL_ENABLE_IRQ_AR);
 
-    // espera IRQ (~500us = 500_000 ns). Timeout 2ms.
+    // espera IRQ (~250ns). Timeout 5us.
     t0 = $time;
-    wait_irq_or_timeout(2_000_000, got_irq);
+    wait_irq_or_timeout(5_000, got_irq);
 
     if (!got_irq) begin
       $display("[%0t] ERROR: timeout IRQ fase 2", $time);
@@ -325,7 +326,7 @@ module tb_timer_presc_then_post;
     end
 
     t1 = $time;
-    $display("[%0t] IRQ fase 2 OK. Delta = %0t ns (esperado ~500_000 ns)", $time, (t1 - t0));
+    $display("[%0t] IRQ fase 2 OK. Delta = %0t ns (esperado ~250 ns)", $time, (t1 - t0));
 
     // limpa IRQ e termina
     clear_irq_pend();
