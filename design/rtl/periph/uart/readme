@@ -1,6 +1,7 @@
 🚀 RISC-V SoC UART Testbench
 Este repositório contém um Testbench avançado em Verilog (tb_soc_uart_full.v) desenvolvido para validar a integração de um processador RISC-V com um periférico UART Lite através de um barramento AXI4.
 O Testbench simula todo o ambiente externo ao chip: memória RAM, clock, reset e um monitor serial virtual.
+O código base se encontra em https://github.com/ultraembedded/riscv_soc/tree/master
 
 ✨ Principais Funcionalidades
 1 Gerador de Firmware Dinâmico (Assembly Injection):
