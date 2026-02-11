@@ -1,1 +1,17 @@
+🚀 RISC-V SoC UART Testbench
+Este repositório contém um Testbench avançado em Verilog (tb_soc_uart_full.v) desenvolvido para validar a integração de um processador RISC-V com um periférico UART Lite através de um barramento AXI4.
+O Testbench simula todo o ambiente externo ao chip: memória RAM, clock, reset e um monitor serial virtual.
 
+✨ Principais Funcionalidades
+1 Gerador de Firmware Dinâmico (Assembly Injection):
+ - Converte automaticamente uma string de texto (ex: "Ola Mundo") em instruções de máquina RISC-V.
+ - Preenche a memória RAM simulada.
+ - Gera um arquivo firmware.hex como backup.
+2 Carregador de Arquivos HEX:
+ - Capacidade de carregar programas compilados externamente (GCC/Assembly) via arquivo .hex.
+3 Simulação de RAM AXI4:
+ - Atua como um Slave AXI4, respondendo a requisições de leitura de instruções (Instruction Fetch) do processador.
+4 Monitor Serial Inteligente:
+ - Decodifica os sinais físicos do pino TX da UART.
+ - Reconstrói os bytes enviados e exibe no console do simulador.
+ - Possui modo "Tempo Real" ou "Bufferizado".
