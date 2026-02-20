@@ -1,1 +1,16 @@
+Este repositório contém um IP de UART com interface AXI4-Lite e um ambiente de verificação completo baseado na metodologia UVM (Universal Verification Methodology). 
+Este projeto serve como prova de conceito e base de infraestrutura para a verificação de um System-on-Chip (SoC) complexo.
 
+O objetivo foi desenvolver um periférico de comunicação serial robusto e um testbench modular que permita validar o protocolo AXI e a integridade da serialização/deserialização de dados.
+
+Hardware (DUT)
+Interface: AXI4-Lite (32-bit data).
+Baud Rate: Configurável via registro (divisor de clock).
+Buffer: Registros de status para monitoramento de tx_busy e rx_ready.
+Lógica de Disparo: Implementação de handshake robusto entre o barramento e o core da UART.
+
+Verificação (UVM)
+Agente AXI: Driver e Monitor operando no protocolo AXI4-Lite.
+Agente UART: Monitor customizado com amostragem de 16x (oversampling) e detecção de borda.
+Scoreboard: Comparação em tempo real entre dados do barramento e tráfego serial.
+Cobertura Funcional: Bins de cobertura para endereços, tipos de acesso (R/W) e valores de dados.
