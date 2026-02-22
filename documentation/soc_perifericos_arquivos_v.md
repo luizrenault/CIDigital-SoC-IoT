@@ -71,3 +71,35 @@ Fonte do mapa: `design/rtl/SoC_completo/soc_addr_map.vh`.
 | `design/rtl/SoC_completo/I2C/i2c_single_reg.v` | `i2c_single_reg` | Bloco de registrador AXI-Lite auxiliar para controle/estado no subsistema I2C. |
 | `design/rtl/SoC_completo/I2C/axis_fifo.v` | `axis_fifo` | FIFO AXI-Stream usada no caminho de comandos/dados do controlador I2C. |
 | `design/rtl/SoC_completo/INTC/axil_intc.v` | `axil_intc` | Controlador de interrupcoes AXI-Lite: mascara/pending por fonte e consolidacao para uma saida global para a CPU. |
+
+## Descricao funcional de cada modulo (`module`)
+
+Escopo: modulos RTL usados no SoC atual (sem testbenches).
+
+| Modulo | Arquivo `.v` | Descricao funcional |
+|---|---|---|
+| `soc_top_teste_mem_periph` | `design/rtl/top/top_teste.v` | Integracao completa do SoC: conecta CPU, memoria, interconnects, perifericos e roteamento de interrupcoes. |
+| `picorv32` | `design/rtl/cpu/picorv32.v` | Core RISC-V RV32I principal (pipeline, decode/execute, acesso a memoria e sinais de interrupcao). |
+| `picorv32_regs` | `design/rtl/cpu/picorv32.v` | Banco de registradores do PicoRV32 (x0..x31), separado para variantes de implementacao/otimizacao. |
+| `picorv32_pcpi_mul` | `design/rtl/cpu/picorv32.v` | Coprocessador PCPI de multiplicacao iterativa para instrucoes de multiplicacao. |
+| `picorv32_pcpi_fast_mul` | `design/rtl/cpu/picorv32.v` | Coprocessador PCPI de multiplicacao com caminho mais rapido (tradeoff de area/desempenho). |
+| `picorv32_pcpi_div` | `design/rtl/cpu/picorv32.v` | Coprocessador PCPI para divisao/modulo. |
+| `picorv32_axi` | `design/rtl/cpu/picorv32.v` | Wrapper do core com interface AXI (mestre), usado pelo top para acesso ao barramento do SoC. |
+| `picorv32_axi_adapter` | `design/rtl/cpu/picorv32.v` | Adaptador entre interface nativa de memoria do core e canal AXI. |
+| `picorv32_wb` | `design/rtl/cpu/picorv32.v` | Wrapper alternativo para barramento Wishbone (nao usado no top atual). |
+| `axi_lite_ic_1x2` | `design/rtl/bus/axi_1_2.v` | Interconnect AXI-Lite 1x2 para separar trafego entre regiao de memoria e regiao de perifericos. |
+| `axi_lite_interconnect_1x6` | `design/rtl/bus/axi_interconect_1_6.v` | Interconnect AXI-Lite 1x6 para decodificar e encaminhar acessos aos 6 perifericos. |
+| `axi_lite_ram` | `design/rtl/bus/axi_mem.v` | Memoria RAM mapeada em AXI-Lite com leitura/escrita por bytes e preload opcional de firmware. |
+| `axilgpio` | `design/rtl/periph/gpio/axilgpio.v` | Periferico GPIO AXI-Lite com registradores de controle de saida, leitura de entrada e IRQ por evento. |
+| `skidbuffer` | `design/rtl/periph/gpio/skidbuffer.v` | Buffer de skid para estabilizar handshake em canais de streaming/AXI sob backpressure. |
+| `timer` | `design/rtl/periph/timer/timer.v` | Timer com compare, prescaler/postscaler, autoreload e geracao de interrupcao. |
+| `uart_lite` | `design/rtl/SoC_completo/UART/uart_lite.v` | UART Lite com interface AXI-Lite para configuracao, TX/RX de dados e status/IRQ. |
+| `spi_master_axil` | `design/rtl/SoC_completo/SPI/spi_master_axil.v` | Interface AXI-Lite de alto nivel para comandar o SPI master e seus FIFOs. |
+| `spi_master` | `design/rtl/SoC_completo/SPI/spi_master.v` | Motor SPI de baixo nivel (clock serial, shift register, controle de CS e transferencia). |
+| `axis_fifo` | `design/rtl/SoC_completo/SPI/axis_fifo.v` | FIFO AXI-Stream usada no caminho de dados do SPI. |
+| `i2c_master_axil` | `design/rtl/SoC_completo/I2C/i2c_master_axil.v` | Interface AXI-Lite para controle do I2C master, filas de comando e estado do barramento. |
+| `i2c_master` | `design/rtl/SoC_completo/I2C/i2c_master.v` | Motor I2C master de protocolo (START/STOP, ACK/NACK, leitura/escrita e temporizacao de SCL/SDA). |
+| `i2c_init` | `design/rtl/SoC_completo/I2C/i2c_init.v` | Modulo de inicializacao automatica de sequencias I2C na partida. |
+| `i2c_single_reg` | `design/rtl/SoC_completo/I2C/i2c_single_reg.v` | Bloco de registrador de apoio para configuracao/status no subsistema I2C. |
+| `axis_fifo` | `design/rtl/SoC_completo/I2C/axis_fifo.v` | FIFO AXI-Stream usada no caminho de dados/comandos do I2C. |
+| `axil_intc` | `design/rtl/SoC_completo/INTC/axil_intc.v` | Controlador de interrupcoes AXI-Lite com mascara, pending e consolidacao em uma IRQ global da CPU. |
