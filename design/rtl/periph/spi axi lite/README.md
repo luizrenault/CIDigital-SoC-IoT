@@ -314,6 +314,17 @@ design/rtl/periph/spi axi lite/
 └── README.md          # This file
 ```
 
+## Running the Local Testbench
+
+Use the testbench under `tb/`:
+
+```bash
+cd design/rtl/periph/spi\ axi\ lite/tb
+make compile
+make run
+make lint
+```
+
 ## Version History
 
 - **V1.0** - Initial release

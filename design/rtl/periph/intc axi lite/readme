@@ -55,6 +55,16 @@ After reset:
 - Current `intc_axilite.v` computes `int_o` internally but does not expose it as a top-level output pin.
 - If SoC integration needs the interrupt line, add an output port in `intc_axilite.v` and connect it to the internal `int_o` signal.
 
+## Running Local Checks
+
+There is no dedicated testbench in this directory. For quick syntax and lint sanity checks:
+
+```bash
+cd design/rtl/periph/intc\ axi\ lite
+iverilog -g2012 -o /dev/null intc_axilite.v axlite2wbsp.v simple_pic.v
+verilator --lint-only -Wall intc_axilite.v
+```
+
 ## Files
 
 - `intc_axilite.v`

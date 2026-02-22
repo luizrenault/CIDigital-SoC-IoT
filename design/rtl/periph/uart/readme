@@ -1,50 +1,49 @@
-# UART Peripheral Testbench Notes
+# UART Peripheral Testbench
 
-Este diretorio possui um testbench de integracao SoC+UART, nao apenas um teste unitario da UART.
+## Overview
 
-## Arquivo principal
+This directory contains a SoC-level UART integration testbench, not a standalone UART unit test.
 
-- `TB_SOC_UART_FULL.v`
+## Files
 
-Observacao: em Linux o nome do arquivo e case-sensitive. O nome correto e `TB_SOC_UART_FULL.v` (nao `tb_soc_uart_full.v`).
+- `TB_SOC_UART_FULL.v` (main testbench)
 
-## O que o testbench cobre
+Note: file names are case-sensitive on Linux. Use `TB_SOC_UART_FULL.v` (not `tb_soc_uart_full.v`).
 
-- Integracao do processador RISC-V com UART via barramento AXI
-- Modelo de RAM para fetch de instrucoes
-- Geracao/carregamento de firmware em formato HEX
-- Monitor serial virtual no TX da UART
+## Testbench Coverage
 
-## Principais funcionalidades
+- RISC-V CPU and UART integration over AXI bus transactions
+- Simulated instruction/data memory behavior
+- Firmware loading from generated or external HEX files
+- Virtual serial monitor decoding UART TX output
 
-1. **Gerador de firmware dinamico (assembly injection)**
-   - Converte strings (ex.: "Ola Mundo") em palavras de maquina RISC-V
-   - Inicializa a RAM da simulacao
-   - Gera `firmware.hex` para depuracao
+## Key Capabilities
 
-2. **Carregador de HEX externo**
-   - Permite usar firmware compilado fora do testbench
+1. **Dynamic firmware generation**
+   - Converts text payloads (for example, "Ola Mundo") into RISC-V machine words
+   - Initializes simulated RAM
+   - Emits `firmware.hex` for debug and replay
 
-3. **RAM AXI simulada**
-   - Responde a acessos de leitura de instrucao
+2. **External HEX program loading**
+   - Runs prebuilt firmware images produced outside this testbench
 
-4. **Monitor serial**
-   - Reconstroi bytes enviados no TX
-   - Exibe no console durante a simulacao
+3. **AXI memory model behavior**
+   - Serves instruction fetch reads from the simulated memory subsystem
 
-## Execucao rapida (Icarus Verilog)
+4. **UART TX monitor**
+   - Reconstructs outgoing bytes from TX signaling
+   - Prints decoded output to simulator console
 
-Exemplo minimo:
+## Running the Local Testbench
 
 ```bash
+cd design/rtl/periph/uart
 iverilog -g2012 -o tb_uart.vvp TB_SOC_UART_FULL.v
 vvp tb_uart.vvp
 ```
 
-Se houver dependencias externas (por exemplo, modulos importados do projeto base), inclua os arquivos e `-I` necessarios no comando de compilacao.
+If your setup requires external RTL dependencies, add the required source files and include directories (`-I...`) to the compile command.
 
-## Referencia
-
-Base original mencionada pelo projeto:
+## Reference
 
 - `https://github.com/ultraembedded/riscv_soc/tree/master`
