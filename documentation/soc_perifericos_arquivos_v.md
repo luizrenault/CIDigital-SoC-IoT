@@ -71,9 +71,3 @@ Fonte do mapa: `design/rtl/SoC_completo/soc_addr_map.vh`.
 | `design/rtl/SoC_completo/I2C/i2c_single_reg.v` | `i2c_single_reg` | Bloco de registrador AXI-Lite auxiliar para controle/estado no subsistema I2C. |
 | `design/rtl/SoC_completo/I2C/axis_fifo.v` | `axis_fifo` | FIFO AXI-Stream usada no caminho de comandos/dados do controlador I2C. |
 | `design/rtl/SoC_completo/INTC/axil_intc.v` | `axil_intc` | Controlador de interrupcoes AXI-Lite: mascara/pending por fonte e consolidacao para uma saida global para a CPU. |
-
-## Observacoes para futura correcao da documentacao atual (sem alterar agora)
-
-- `documentation/readme`: secao **Equipe** aparece duas vezes.
-- `documentation/readme`: arvore de diretorios cita `rtl/` e `docs/`, enquanto o repositorio atual usa `design/rtl/` e `documentation/`.
-- Possivel inconsistencia de alvo de FPGA entre partes da documentacao (DE1/Cyclone II vs referencias a iCE40 em documentacao do PicoSoC).
